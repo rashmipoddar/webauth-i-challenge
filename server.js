@@ -4,13 +4,13 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 
 const User = require('./data/UsersModel');
+const restrictedRoutes = require('./data/restrictedRoutes');
 
 const server = express();
 
 server.use(helmet());
 server.use(cors());
 server.use(express.json());
-
 
 const validateUserData = (req, res, next) => {
   if (!req.body.username || !req.body.password) {
@@ -73,7 +73,7 @@ server.get('/users', validateUser, (req, res) => {
 });
 
 function validateUser(req, res, next) {
-  const userInfo = req.headers;
+  const userInfo = req.headers || req.body;
   if (!userInfo.username || !userInfo.password) {
     res.status(400).send({message: 'Username and password required.'});
   } else {
@@ -92,5 +92,10 @@ function validateUser(req, res, next) {
     })
   }
 };
+
+
+server.use(validateUser);
+server.use('/restricted', restrictedRoutes);
+
 
 module.exports = server;
