@@ -28,6 +28,7 @@ router.post('/login', validateUserData,  (req, res) => {
     .then(user => {
       // console.log(user);
       if(user && bcrypt.compareSync(userInfo.password, user.password)) {
+        req.session.username = user.username;
         res.status(200).send('Logged in');
       } else {
         res.status(401).send({message: 'Invalid user credentials'});
@@ -49,6 +50,21 @@ router.get('/users', validateUser, (req, res) => {
       console.log(err);
       res.status(500).send({message: 'There was an error in getting users from the db. Try again.'});
     })
+});
+
+router.get('/logout', (req, res) => {
+  console.log(req.session);
+  if(req.session) {
+    req.session.destroy(error => {
+      if(error) {
+        res.status(500).send({message: 'You were not able to log out.'});
+      } else {
+        res.status(200).send({message: 'Logout Successful'});
+      }
+    })
+  } else {
+    res.status(200).send({message: 'You should login first to be able to log out.'});
+  }
 });
 
 module.exports = router;
